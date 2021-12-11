@@ -16,17 +16,18 @@ function FileExist(path){
     }    
 }
 
-// Options
+//Flags
+program
+.option('-f, --file' ,'')
+.action()
 
 program
-.option('-f, --file' ,'Read journal data from FILE.')
-.action(
-    console.log("igigib")
-)
+.option('-s, --sort ' ,'')
+.action()
 
-
-
-
+program
+.option('-pdb,--price-db' ,'')
+.action()
 
 
 
@@ -69,6 +70,7 @@ program
   program.parse(process.argv); // Explicit, node conventions
 
 
- 
+  const options = program.opts();
+  if (options.file) console.log("optionsaasaaaadsaasad");
 
 

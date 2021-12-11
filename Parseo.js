@@ -1,3 +1,4 @@
+//--------------------------------------------------------------------------
 // ; Bitcoin trades
 // 2012/11/16 Sold some bitcoins
 // 	Asset:Bitcoin Wallet	-3.5 BTC
@@ -6,7 +7,22 @@
 // 	Asset:Bitcoin Wallet   	15 BTC
 // 	Bank:Paypal		-$300
 
+//--------------------------With Parseo--------------------------------------
 
+// [
+//     {
+//       movements: [ [Object], [Object] ],
+//       date: '2012/11/16',
+//       description: 'Sold some bitcoins'
+//     },
+//     {
+//       movements: [ [Object], [Object] ],
+//       date: '2012/11/29',
+//       description: 'Purchased bitcoins'
+//     }
+//   ]
+
+//------OBJECT
 // [
 //     { description: 'Bank:Paypal', amount: 350, currency: '$' },
 //     { description: 'Income:Hard Work', amount: -350, currency: '$' }
@@ -19,62 +35,65 @@ const lineByLine = require('n-readlines');
 const Parseo = (file) => { 
     
     const entry = new lineByLine(`ledger-sample-files/${file}`);
-    let line = entry.next();
-    // while (line = entry.next()) {
-         line = line.toString('ascii');
-        console.log(line)
-        // if  (line.startsWith(";")) {
-            
-        // }
+    let row = "";
+    let operations={}
+    let movement={}
+    var transactions = []
+    //Mientras haya una sig linea lee la sig linea 
+    while (row = entry.next())
+    {
+        //El uso de ledger en el shell de comandos de Windows tiene una limitación significativa. CMD.EXE está limitado a caracteres ASCII estándar y, como tal, no puede mostrar ningún símbolo de moneda que no sea el signo de dólar.PS
+       
+        row = row.toString('ascii');
 
-        // else if (line.match(RGX_DATE)){
-        //     if (JSON.stringify(transaccion)!='{}') {
-        //         array_transactions.push(transaccion);
-        //     } 
-        //     transaccion = { movements: []}
-            
-        //     var date= (line.match(RGX_DATE).toString());
-        //     transaccion['date'] = date;
-        
-        //     var description = (line.match(RGX_DESCRIPTION).toString().trim());
-        //     transaccion['description'] = description; 
+        if(row[0]!=";"){
+            let SecondRow = row.match(/^(\d{4}\/\d{1,2}\/\d{1,2})\s(.*)/);
+            let MovRow=row.match(/(^[^\-?\$?\d+\.?\d+$]+)(.*)?/);
 
+            //Second Row         2012/11/16 Sold some bitcoins
+            if(SecondRow){
+ 
+                if (Object.entries(operations).length!=0) 
+                {
+                    //Si se lee otra fecha se puede pushear al arreglo
+                    transactions.push(operations);
 
-            
-        // } else if (line.match(RGX_ACCOUNT_NAME)) {
-        //     movement['description'] = line.match(RGX_ACCOUNT_NAME).toString().trim();
-        //     if (line.match(RGX_AMOUNTTEST)) {
-        //         var cantidad = line.match(RGX_AMOUNTTEST).toString().trim();
-        //         if (cantidad.startsWith('$')|| cantidad.startsWith('-$')) {
-        //             cantidad = cantidad.replace('$','');
-        //             var monto = parseFloat(cantidad);
-        //             var currency = '$';
-        //         } else {
-        //             cantidad = cantidad.split(' ');
-        //             var monto = parseFloat(cantidad[0]);
-        //             var currency = cantidad[1];
-        //         }
-        //         contador += monto;
-        //         negcurrency = currency;
+                } 
+                operations = { movements: []}
+                //Separate in date - descripction
+                let date = (SecondRow[1]);
+                let description = (SecondRow[2]);
+                operations['description'] = description;
+                operations['date'] = date;
+            }
+
+            if(MovRow)
+            {
+                movement['description'] = MovRow[1].trim();
                 
-        //         movement['amount'] = monto;
-        //         movement['currency'] = currency;
-        //         account = {}
-        //     } else {
-        //         movement['amount'] = -contador;
-        //         movement['currency'] = negcurrency;
-        //         account = {}
-        //         contador = 0;
-        //     }
-        //     transaccion['movements'].push(movement);
-        //     movement = {}
-        // }     
-    // }
-    // transactions.push(transaccion);
-    
-    //  console.log(sprintf("%5j",array_transactions));
 
-    //  return transactions; 
+                if(MovRow[2])
+                {
+                    let quantity = MovRow[2].trim();
+                    
+
+                    if(quantity[0]=="$" || quantity[1]=="$" ){
+                        quantity = quantity.replace('$','');
+                        console.log(quantity)
+                        // var monto = parseFloat(cantidad);
+                        // var currency = '$';
+                    }
+
+                }
+            }
+ 
+    
+
+        }
+
+    }
+
+    
 }
 
 module.exports = Parseo;
