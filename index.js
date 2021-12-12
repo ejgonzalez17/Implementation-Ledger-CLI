@@ -8,7 +8,12 @@ function Exist(path){
     {
         const tokenizer = require("./Regex");
         transactions = tokenizer(path); 
-
+        //Revisar si hay SORT N o D 
+        var options2 = program.opts();
+          if (options2.sort) 
+        {
+        transactions = Sort(transactions,options2 );
+        }
         return true;
 
     } else {
@@ -38,7 +43,6 @@ program
 .alias('rg')
 .description('')
 .action(function(path) {
-     
     if(Exist(path)) {
             Register(transactions,program.sort);
     } 
@@ -63,30 +67,69 @@ program
     }
 })
 
-  program.parse(process.argv); // Explicit, node conventions
 
 //------------------------------ Flags------------------------------
 program
-.option('-f, --file' ,'')
+.option('-f, --file ' ,'')
 .action()
 
 program
-.option('-s, --sort ' ,'')
+.option('-s, --sort <type>' ,'')
 .action()
 
 program
 .option('-pdb,--price-db' ,'')
 .action()
 
-  const options = program.opts();
-  if (options.file) console.log("optionsaasaaaadsaasad");
+program.parse(process.argv); // Explicit, node conventions
 
+var options = program.opts();
 
-//------------------------- REGISTER ------------------------------
-function Register(transactions,sort){ 
-    // const sortby = require("./Sort");
-    // sortby(transactions, sort);
+  //-------------------------SORT ------------------------------
+  function SortBy_Des() {
+    transactions.sort(function(a, b) {
+        var desc1 = a.description.toUpperCase(); 
+        var desc2 = b.description.toUpperCase(); 
+        if (desc1 < desc2) {
+            return -1;
+        }
+        if (desc1 > desc2) {
+            return 1;
+        }
+        return 0;
+    }); 
+    return transactions; 
+}
 
+function SortBy_Date() {
+        transactions.sort(function(a,b) { 
+        //return new Date(b.date) - new Date(a.date);
+        return new Date(a.date).getTime() - new Date(b.date).getTime() 
+    });
+    return transactions;
+}
+
+function Sort(transactions,options2){
+   
+    function SortBY(sort) {
+        if (sort == 'n') {
+            return  SortBy_Des(transactions);
+        } if (sort == 'd') { 
+            return SortBy_Date(transactions);
+        }
+    } 
+    return SortBY(options2.sort);
+}
+
+  
+//-------------------------REGISTER ------------------------------
+function Register(transactions)
+{ 
+    // var options2 = program.opts();
+    // if (options2.sort) 
+    // {
+    //    transactions = Sort(transactions,options2 );
+    // }
     var Content = [];
     var sum = {};
     var total = [];
@@ -143,6 +186,12 @@ function Register(transactions,sort){
 //-------------------------BALANCE------------------------------
 function Balance(transactions,sort)
 { 
+    // var options2 = program.opts();
+    // if (options2.sort) 
+    // {
+    //    transactions = Sort(transactions,options2 );
+    // }
+
     let Content = {}
     for (file in transactions) {
         //Checar los movimientos 

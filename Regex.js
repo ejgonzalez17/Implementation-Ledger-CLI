@@ -114,4 +114,5 @@ const tokenizer = (file) => {
     return transactions;       
 }
 
+
 module.exports = tokenizer;
