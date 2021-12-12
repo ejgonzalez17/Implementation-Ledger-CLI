@@ -48,6 +48,21 @@ program
     }
 })
 
+program
+.command('balance <path>')
+.alias('bl')
+.description('')
+.action(function(path) {
+     
+    if(Exist(path)) {
+        Balance(transactions,program.sort);
+    } 
+    else{
+        console.error("This file doesnt exists");
+         return;
+    }
+})
+
   program.parse(process.argv); // Explicit, node conventions
 
 //------------------------------ Flags------------------------------
@@ -67,7 +82,7 @@ program
   if (options.file) console.log("optionsaasaaaadsaasad");
 
 
-//-------------------------REGISTER ------------------------------
+//------------------------- REGISTER ------------------------------
 function Register(transactions,sort){ 
     // const sortby = require("./Sort");
     // sortby(transactions, sort);
@@ -90,7 +105,7 @@ function Register(transactions,sort){
         }
 
         for (var i = 0; i < movements; i++) {
-            //console.log(transactions[row]["movements"][i])
+            
             var amount = transactions[row]["movements"][i]["amount"];
             var curr = transactions[row]["movements"][i]["currency"];
             var desc = transactions[row]["movements"][i]["description"];
@@ -128,6 +143,51 @@ function Register(transactions,sort){
 //-------------------------BALANCE------------------------------
 function Balance(transactions,sort)
 { 
- 
-   
+    let Content = {}
+    for (file in transactions) {
+        //Checar los movimientos 
+        let movements = (transactions[file]["movements"]).length;
+        
+        for (let i=0; i<movements; i++) {
+            var amount = transactions[file]["movements"][i]["amount"]; 
+            var curr = transactions[file]["movements"][i]["currency"];        
+            var description = transactions[file]["movements"][i]["description"];
+            //Checar descripcion
+            if (Content[description]!=undefined) 
+            {
+                Content[description][0] += amount
+            } 
+            else
+            {
+                Content[description] = [amount, curr]
+            }
+        }
+    }
+     let sum = {}
+     let currency;
+     let properties = Object.keys(Content);
+     for (let des in properties) {
+        currency = Content[properties[des]][1]
+        if (sum.hasOwnProperty(currency)){
+            sum[currency] += Content[properties[des]][0]
+        } else {
+            sum[currency] = Content[properties[des]][0]
+        }
+    }         
+
+    for (let i in properties){
+        
+        let money = `${Content[properties[i]][1] } ${Content[properties[i]][0]}`;
+        let  qnt = money.padStart(20, " ")+ "  ";
+        console.log( qnt, properties[i]); 
+    };
+    console.log('--------------------')
+    
+    for (var i in sum) {
+        if (sum.hasOwnProperty(i)) 
+        {        
+            let balance = i.padStart(12, " ");   
+            console.log(balance, sum[i]);
+        }
+    }
 }
