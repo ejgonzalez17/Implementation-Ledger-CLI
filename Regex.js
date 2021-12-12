@@ -7,7 +7,7 @@
 // 	Asset:Bitcoin Wallet   	15 BTC
 // 	Bank:Paypal		-$300
 
-//--------------------------With Parseo--------------------------------------
+//--------------------------With Tokenizacion--------------------------------------
 
 // [
 //     {
@@ -32,20 +32,22 @@
 //Facilitar lectura linea por linea
 const lineByLine = require('n-readlines');
 
-const Parseo = (file) => { 
+const tokenizer = (file) => { 
     
     const entry = new lineByLine(`ledger-sample-files/${file}`);
     let row = "";
     let operations={}
     let movement={}
     var transactions = []
+    let currency;
+    let aux=0;
     //Mientras haya una sig linea lee la sig linea 
     while (row = entry.next())
     {
         //El uso de ledger en el shell de comandos de Windows tiene una limitación significativa. CMD.EXE está limitado a caracteres ASCII estándar y, como tal, no puede mostrar ningún símbolo de moneda que no sea el signo de dólar.PS
        
         row = row.toString('ascii');
-
+        
         if(row[0]!=";"){
             let SecondRow = row.match(/^(\d{4}\/\d{1,2}\/\d{1,2})\s(.*)/);
             let MovRow=row.match(/(^[^\-?\$?\d+\.?\d+$]+)(.*)?/);
@@ -68,32 +70,48 @@ const Parseo = (file) => {
             }
 
             if(MovRow)
-            {
-                movement['description'] = MovRow[1].trim();
-                
+            { 
+                movement['description'] = MovRow[1].trim();        
+               
 
                 if(MovRow[2])
                 {
                     let quantity = MovRow[2].trim();
-                    
-
+                    let amount;
                     if(quantity[0]=="$" || quantity[1]=="$" ){
                         quantity = quantity.replace('$','');
-                        console.log(quantity)
-                        // var monto = parseFloat(cantidad);
-                        // var currency = '$';
+                        
+                        amount = parseFloat(quantity);
+                        currency = '$';
+                        
                     }
-
+                    else {
+                        quantity = quantity.split(' ');       
+                        //In case -3.5 BTC 
+                        amount = parseFloat(quantity[0]);
+                        currency = quantity[1];
+                    }
+                    aux += amount;
+                    
+                    movement['amount'] = amount;
+                    movement['currency'] = currency;
                 }
+                else{
+                    movement['amount'] = -aux;
+                    movement['currency'] = currency;
+                    aux = 0;
+                }
+                operations['movements'].push(movement);
+                //Restart Movment para tomar otros movimientos!
+                movement = {}
+              //  console.log(movement)
             }
- 
-    
-
         }
-
+           
     }
-
-    
+   transactions.push(operations);
+    // console.log(transactions[0]);
+    return transactions;       
 }
 
-module.exports = Parseo;
+module.exports = tokenizer;

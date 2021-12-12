@@ -2,6 +2,8 @@ const Register = (transactions,sort) => {
     // const sortby = require("./Sort");
     // sortby(transactions, sort);
 
+
+    console.log(transactions)
     // var Content = [];
     // var sum = {};
     // var total = [];
@@ -14,8 +16,6 @@ const Register = (transactions,sort) => {
     //     var description = transactions[row]["description"];
 
     //     console.log(`${date} ${description}`);
-
-
     //       //Redondeo de valores
     //       function round(x) {
     //         return Number.parseFloat(x).toFixed(2);
