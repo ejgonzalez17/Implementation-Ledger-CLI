@@ -28,15 +28,15 @@ program
 .alias('pr')
 .description('Print out the full transactions of any matching postings')
 .action(function(path) {
-    fs.readFile("ledger-sample-files/" + path, "utf8", (err, data) => 
-    {
-        if (err) {
-            console.error("This file doesnt exists");
-            return;
-        }
-        console.table(data);
-    });
+    if(Exist(path)) {
+            Print(transactions,program.sort);
+    } 
+    else{
+        console.error("This file doesnt exists");
+         return;
+    }
 })
+
 
   program
 .command('register <path>')
@@ -66,8 +66,6 @@ program
          return;
     }
 })
-
-
 //------------------------------ Flags------------------------------
 program
 .option('-f, --file ' ,'')
@@ -85,7 +83,7 @@ program.parse(process.argv); // Explicit, node conventions
 
 var options = program.opts();
 
-  //-------------------------SORT ------------------------------
+//-------------------------SORT ------------------------------
   function SortBy_Des() {
     transactions.sort(function(a, b) {
         var desc1 = a.description.toUpperCase(); 
@@ -121,6 +119,27 @@ function Sort(transactions,options2){
     return SortBY(options2.sort);
 }
 
+//-------------------------PRINT ------------------------------
+function Print(transactions){
+    for (row in transactions) {
+        //Checa cuantos hay (row)
+        var movements = transactions[row]["movements"].length;
+        var date = transactions[row]["date"];
+        date = date.replace(/\//g, "-");
+        var description = transactions[row]["description"];
+
+        console.log(`${date} ${description}`);
+
+        for (var i = 0; i < movements; i++) {
+            
+            var amount = transactions[row]["movements"][i]["amount"];
+            var curr = transactions[row]["movements"][i]["currency"];
+            var desc = transactions[row]["movements"][i]["description"];
+            new_desc = desc.padStart(40, " ")+"     ";
+            console.log(`${new_desc} ${curr} ${amount} `);
+        }
+    }
+}
   
 //-------------------------REGISTER ------------------------------
 function Register(transactions)
