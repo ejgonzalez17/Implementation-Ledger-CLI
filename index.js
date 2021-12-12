@@ -68,11 +68,11 @@ program
 })
 //------------------------------ Flags------------------------------
 program
-.option('-f, --file ' ,'')
+.requiredOption('-f, --file ' ,'')
 .action()
 
 program
-.option('-s, --sort <type>' ,'')
+.option('-s, --sort <type> ' ,'')
 .action()
 
 program
@@ -82,6 +82,17 @@ program
 program.parse(process.argv); // Explicit, node conventions
 
 var options = program.opts();
+
+
+// if(options.file)
+// {
+//  console.error("Forget the Falg -f");
+//             return;
+// }
+// if (options.sort === undefined){
+//     console.log('The way it was ordered was not specified (by Name "n" or date "d")');
+//     return;
+// } 
 
 //-------------------------SORT ------------------------------
   function SortBy_Des() {
@@ -136,7 +147,8 @@ function Print(transactions){
             var curr = transactions[row]["movements"][i]["currency"];
             var desc = transactions[row]["movements"][i]["description"];
             new_desc = desc.padStart(40, " ")+"     ";
-            console.log(`${new_desc} ${curr} ${amount} `);
+            console.log('\x1b[36m',`${new_desc} ${curr} ${amount} `,'\x1b[0m');
+            
         }
     }
 }
