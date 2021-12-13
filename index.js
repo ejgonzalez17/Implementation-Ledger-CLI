@@ -5,6 +5,7 @@ program.version("0.0.1");
 const fs = require("fs");
 
 const { parse } = require("path");
+const { Console } = require("console");
 
 function Exist(path) {
     if (fs.existsSync("ledger-sample-files/" + path)) {
@@ -83,7 +84,9 @@ program.option("-s, --sort <type> ", "").action();
 
 program.option("-pdb,--price-db <path>", "").action();
 
-program.option("-mk,--market", "").action();
+program.option("-mk,--market ", "").action();
+
+program.option("-ex,--exchange <type>", "").action();
 
 program.parse(process.argv); // Explicit, node conventions
 
@@ -98,6 +101,7 @@ var options = program.opts();
 //     console.log('The way it was ordered was not specified (by Name "n" or date "d")');
 //     return;
 // }
+
 
 //-------------------------PRICE-DB------------------------------
 New_commodity = "";
@@ -152,6 +156,7 @@ function PriceDB(PDpath) {
         // AU: { value: '$1751.90', dateTime: '2012/11/25 05:04:00' },
         // BTC: { value: '$12.46', dateTime: '2012/11/25 05:04:00' },
         // CAD: { value: '$1.0066', dateTime: '2012/11/26 05:04:00' }
+       
         return {
             New_commodity: New_commodity,
             coinage: coinage,
@@ -222,32 +227,49 @@ function Print(transactions) {
                 }
                 new_amount = amount * value;
                 new_amount = new_amount.toFixed(2);
+
+                //------------------------------------------------------
+                                    if(options2.exchange=="BTC")
+                                    {
+                                        New_commodity="BTC"
+                                        new_amount=(new_amount/12.46).toFixed(2);
+                                    }
+                                    else if(options2.exchange=="AG")
+                                    {
+                                        New_commodity="AG"
+                                        new_amount=(new_amount/34.13).toFixed(2);
+                                    }
+                                    else if(options2.exchange=="AU")
+                                    {
+                                        New_commodity="AU"
+                                        new_amount=(new_amount/1751.90).toFixed(2);
+                                    }
+                                    else if(options2.exchange=="CAD")
+                                    {
+                                        New_commodity="CAD"
+                                        new_amount=(new_amount/1.0066).toFixed(2);
+                                    }
+                                    else{
+                                        console.error("Currency not found")
+                                        return false;
+                                    }
+                                    
+                //------------------------------------------------------
+
                 if (new_amount < 0) {
-                    console.log(
-                        "\x1b[31m",
-                        `${new_desc} ${New_commodity} ${new_amount} `,
-                        "\x1b[0m"
-                    );
+                    console.log( "\x1b[31m",`${new_desc} ${New_commodity} ${new_amount} `,"\x1b[0m" );
                 } else {
-                    console.log(
-                        "\x1b[36m",
-                        `${new_desc} ${New_commodity} ${new_amount} `,
-                        "\x1b[0m"
+                    console.log("\x1b[36m",`${new_desc} ${New_commodity} ${new_amount} `,"\x1b[0m"
                     );
                 }
+                New_commodity="$"
             } else {
                 amount = amount.toFixed(2);
                 if (amount < 0) {
-                    console.log(
-                        "\x1b[31m",
-                        `${new_desc} ${curr} ${amount} `,
-                        "\x1b[0m"
+                    console.log("\x1b[31m",`${new_desc} ${curr} ${amount} `,"\x1b[0m"
                     );
                 } else {
-                    console.log(
-                        "\x1b[36m",
-                        `${new_desc} ${curr} ${amount} `,
-                        "\x1b[0m"
+                    console.log( "\x1b[36m",`${new_desc} ${curr} ${amount} `,"\x1b[0m"
                     );
                 }
             }
@@ -257,11 +279,6 @@ function Print(transactions) {
 
 //-------------------------REGISTER ------------------------------
 function Register(transactions) {
-    // var options2 = program.opts();
-    // if (options2.sort)
-    // {
-    //    transactions = Sort(transactions,options2 );
-    // }
     var Content = [];
     var sum = {};
     var total = [];
@@ -311,12 +328,89 @@ function Register(transactions) {
                  new_amountR=new_amountR.toFixed(2);
                  N_sum=N_sum.toFixed(2);
                  
+                        //         //------------------------------------------------------
+                        //                 if(options2.exchange=="BTC")
+                        //                 {
+                        //                     New_commodity="BTC"
+                        //                     new_amountR=(new_amountR/12.46).toFixed(2);
+                        //                     N_sum=(N_sum/12.46).toFixed(2);
+                                            
+                        //                 }
+                        //                 else if(options2.exchange=="AG")
+                        //                 {
+                        //                     New_commodity="AG"
+                        //                     new_amountR=(new_amountR/34.13).toFixed(2);
+                        //                     N_sum=(N_sum/34.13).toFixed(2);
+                                            
+                        //                 }
+                        //                 else if(options2.exchange=="AU")
+                        //                 {
+                        //                     New_commodity="AU"
+                        //                     new_amountR=(new_amountR/1751.90).toFixed(2);
+                        //                     N_sum=(N_sum/1751.90).toFixed(2);
+                                            
+                        //                 }
+                        //                 else if(options2.exchange=="CAD")
+                        //                 {
+                        //                     New_commodity="CAD"
+                        //                     new_amountR=(new_amountB/1.0066).toFixed(2);
+                        //                     N_sum=(N_sum/1.0066).toFixed(2);
+                                            
+                        //                 }
+                        //                 else{
+                        //                     console.error("Currency not found")
+                        //                     return false;
+                        //                 }
+                                        
+                        // //------------------------------------------------------
+
                 //  New_commodity = New_commodity.padStart(10, " ") ;
                         console.log( `${new_desc} ${New_commodity} ${new_amountR} ${New_commodity.padStart(20, " ")} ${N_sum}`);     
-                }else
+                }
+                else
                 { 
+                        //                 //------------------------------------------------------
+                        //                 if(options2.exchange=="BTC")
+                        //                 {
+                        //                     New_commodity="BTC"
+                        //                     new_curr="BTC";
+                        //                     new_amount=(new_amount/12.46).toFixed(2);
+                        //                     new_sum=(new_sum/12.46).toFixed(2);
+                                            
+                        //                 }
+                        //                 else if(options2.exchange=="AG")
+                        //                 {
+                        //                     curr="AG"
+                        //                     new_curr="AG";
+                        //                     new_amount=(new_amount/34.13).toFixed(2);
+                        //                     new_sum=(new_sum/34.13).toFixed(2);
+                                            
+                        //                 }
+                        //                 else if(options2.exchange=="AU")
+                        //                 {
+                        //                     curr="AU"
+                        //                     new_curr="AU";
+                        //                     new_amount=(new_amount/1751.90).toFixed(2);
+                        //                     new_sum=(new_sum/1751.90).toFixed(2);
+                                            
+                        //                 }
+                        //                 else if(options2.exchange=="CAD")
+                        //                 {
+                        //                     curr="CAD"
+                        //                     new_curr="CAD";
+                        //                     new_amount=(new_amount/1.0066).toFixed(2);
+                        //                     new_sum=(new_sum/1.0066).toFixed(2);
+                                            
+                        //                 }
+                        //                 else{
+                        //                     console.error("Currency not found")
+                        //                     return false;
+                        //                 }
+                                        
+                        // //------------------------------------------------------
                         console.log(`${new_desc} ${curr} ${new_amount} ${new_curr.padStart(20, " ")} ${new_sum}`);
                 }
+                New_commodity="$"
             }
             else{
                  new_curr=new_curr.padStart(20, " ");
@@ -353,7 +447,38 @@ function Register(transactions) {
         }
         if (options2.market === true) 
         {
-            console.log(New_commodity.padStart(90, " "),Total.toFixed(2));
+                    //         //------------------------------------------------------
+                    //         if(options2.exchange=="BTC")
+                    //         {
+                    //             New_commodity="BTC"
+                    //             Total=(Total/12.46).toFixed(2);
+                                
+                    //         }
+                    //         else if(options2.exchange=="AG")
+                    //         {
+                    //             New_commodity="AG"
+                    //             Total=(Total/34.13).toFixed(2);
+                                
+                    //         }
+                    //         else if(options2.exchange=="AU")
+                    //         {
+                    //             New_commodity="AU"
+                    //             Total=(Total/1751.90).toFixed(2);
+                                
+                    //         }
+                    //         else if(options2.exchange=="CAD")
+                    //         {
+                    //             curr="CAD"
+                    //             Total=(Total/1.0066).toFixed(2);
+                                
+                    //         }
+                    //         else{
+                    //             console.error("Currency not found")
+                    //             return false;
+                    //         }
+                            
+                    // //------------------------------------------------------
+            console.log(New_commodity.padStart(90, " "),Total);
         }
     }
 }
@@ -423,16 +548,80 @@ function Balance(transactions, sort) {
                     testsumA=parseFloat(new_amountB) ;
                     totalTEST+=parseFloat(testsumA);
 
+                    //------------------------------------------------------
+                                    if(options2.exchange=="BTC")
+                                    {
+                                        New_commodity="BTC"
+                                        new_amountB=(new_amountB/12.46).toFixed(2);
+                                        New_commodity = New_commodity.padStart(10, " ") ;
+                                    }
+                                    else if(options2.exchange=="AG")
+                                    {
+                                        New_commodity="AG"
+                                        new_amountB=(new_amountB/34.13).toFixed(2);
+                                        New_commodity = New_commodity.padStart(10, " ") ;
+                                    }
+                                    else if(options2.exchange=="AU")
+                                    {
+                                        New_commodity="AU"
+                                        new_amountB=(new_amountB/1751.90).toFixed(2);
+                                        New_commodity = New_commodity.padStart(10, " ") ;
+                                    }
+                                    else if(options2.exchange=="CAD")
+                                    {
+                                        New_commodity="CAD"
+                                        new_amountB=(new_amountB/1.0066).toFixed(2);
+                                        New_commodity = New_commodity.padStart(10, " ") ;
+                                    }
+                                    else{
+                                        console.error("Currency not found")
+                                        return false;
+                                    }
+                                    
+                //------------------------------------------------------
 
                     if (new_amountB > 0) {
                         console.log("\x1b[33m",`${New_commodity} ${new_amountB} ${properties[i]} `,"\x1b[0m");
                     } else {
                         console.log( "\x1b[31m",`${New_commodity} ${new_amountB} ${properties[i]} `,"\x1b[0m");
                     }
+                    New_commodity="$"
                 }
                 else {
                     testsumB=parseFloat(money_balance) ;
                     totalTEST+=parseFloat(testsumB);
+                                //------------------------------------------------------
+                                if(options2.exchange=="BTC")
+                                {
+                                    curr="BTC"
+                                    money_balance=(money_balance/12.46).toFixed(2);
+                                    
+                                }
+                                else if(options2.exchange=="AG")
+                                {
+                                    curr="AG"
+                                    money_balance=(money_balance/34.13).toFixed(2);
+                                    
+                                }
+                                else if(options2.exchange=="AU")
+                                {
+                                    curr="AU"
+                                    money_balance=(money_balance/1751.90).toFixed(2);
+                                    
+                                }
+                                else if(options2.exchange=="CAD")
+                                {
+                                    curr="CAD"
+                                    money_balance=(money_balance/1.0066).toFixed(2);
+                                    
+                                }
+                                else{
+                                    console.error("Currency not found")
+                                    return false;
+                                }
+                                
+                            //------------------------------------------------------
+
 
                     if (Content[properties[i]][0] > 0) {
                       
@@ -442,6 +631,7 @@ function Balance(transactions, sort) {
                         
                         console.log( "\x1b[31m",`${curr.padStart(10," ")} ${money_balance} ${properties[i]}`, "\x1b[0m");
                     }
+                    money_balance="$";
                 }
             }
 
@@ -449,7 +639,8 @@ function Balance(transactions, sort) {
             if (Content[properties[i]][0] > 0) {
                 // console.log( qnt, properties[i]);
                 console.log("\x1b[33m", `${qnt} ${properties[i]}`, "\x1b[0m");
-            } else {
+            } 
+            else {
                 console.log("\x1b[31m", `${qnt} ${properties[i]}`, "\x1b[0m");
             }
         }
@@ -459,16 +650,44 @@ function Balance(transactions, sort) {
     let sumB=0;
     let total=0; 
     for (var i in sum) {
-        if (sum.hasOwnProperty(i)) {
-
+        if (sum.hasOwnProperty(i) ) {
             let balance = i.padStart(12, " ");
-            if(options2.market === false){
-                console.log(balance.padStart(15," "), sum[i]);
-            }
+             console.log(balance.padStart(15," "), sum[i]);
+ 
         }
+        
     }
     if (options2.market === true) 
     {
+
+                  //------------------------------------------------------
+                  if(options2.exchange=="BTC")
+                  {
+                      New_commodity="BTC"
+                      totalTEST=(totalTEST/12.46).toFixed(2);
+                  }
+                  else if(options2.exchange=="AG")
+                  {
+                      New_commodity="AG"
+                      totalTEST=(totalTEST/34.13).toFixed(2);
+                  }
+                  else if(options2.exchange=="AU")
+                  {
+                      New_commodity="AU"
+                      totalTEST=(totalTEST/1751.90).toFixed(2);
+                  }
+                  else if(options2.exchange=="CAD")
+                  {
+                      New_commodity="CAD"
+                      totalTEST=(totalTEST/1.0066).toFixed(2);
+                  }
+                  else{
+                      console.error("Currency not found")
+                      return false;
+                  }
+                  
+      //------------------------------------------------------
+
         console.log(New_commodity, totalTEST);
     }
 }
