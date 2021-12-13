@@ -31,17 +31,32 @@ Install Node, if you using Homebrew, then installing the node is breeze with jus
 ### Executing program
 
 #### Commands
+
+OPERATION: PRINT, BALANCE ,REGISTER
+
+REQUIRED FLAG:
+
+➡ File: Read FILE as a ledger file.
+```
+ node index.js -f OPERATION FILE 
+```
+
 PRINT
+Prints the general ledger transactions in a textual format that can be parsed by the ledger.
 ```
- node index.js -f print balance FILE 
+ node index.js -f print  FILE 
 ```
+
 BALANCE
+To find the balances of all of your accounts in your FILE
 ```
- node index.js -f balance balance FILE 
+ node index.js -f balance  FILE 
 ```
+
 REGISTER
+To show all transactions and a running total
 ```
- node index.js -f register balance FILE 
+ node index.js -f register  FILE 
 ```
 
 #### Flags
@@ -54,6 +69,7 @@ node index.js -f -s d OPERATION FILE
 node index.js -f -s n OPERATION FILE
 ```
 -Price-Db
+CURRENCY ( AG, AU, BTC, CAD ,AG)
 ```
 node index.js -f --price-db prices_db -mk -ex CURRENCY OPERATION FILE
 ```
