@@ -3,13 +3,14 @@ const program = require("commander");
 const lineByLine = require("n-readlines");
 program.version("0.0.1");
 const fs = require("fs");
-const { Console } = require("console");
+
+const { parse } = require("path");
 
 function Exist(path) {
     if (fs.existsSync("ledger-sample-files/" + path)) {
         const tokenizer = require("./Regex");
         transactions = tokenizer(path);
-        //Revisar si hay SORT N o D
+        //Check if there is CLASSIFICATION "n" or "d"
         options2 = program.opts();
         if (options2.sort) {
             transactions = Sort(transactions, options2);
@@ -106,7 +107,6 @@ function PriceDB(PDpath) {
     CountDT = {};
     if (fs.existsSync("ledger-sample-files/" + PDpath)) {
         const ContentDB = new lineByLine(`ledger-sample-files/${PDpath}`);
-
         let commodity; //money currency
         let DT; //Datetime
         let line = "";
@@ -123,19 +123,25 @@ function PriceDB(PDpath) {
                 if (P) {
                     commodity = P[3].trim();
                     if (!CountDT[commodity]) {
-                        //First time 0.0
+                        //First time 
+                        coinage=P[4].trim();
                         CountDT[commodity] = {
-                            value: P[4].trim(),
+                            value: coinage,
                             dateTime: P[1].trim(),
                         };
                     } else {
-                        //Encontro en otro commodity en otra fecha
+                        
+                        //Found another commodity/money currency on another date
                         DT = P[1].trim();
-                        if (
-                            new Date(CountDT[commodity].dateTime) < new Date(DT)
-                        ) {
+                        if ( new Date(CountDT[commodity].dateTime) < new Date(DT) ) 
+                        {
                             coinage = P[4].trim();
                             coinage = coinage.replace("$", "");
+                            
+                            CountDT[commodity] = {
+                                value: coinage,
+                                dateTime: P[1].trim(),
+                            };
                         }
                     }
                 }
@@ -151,10 +157,7 @@ function PriceDB(PDpath) {
             coinage: coinage,
         };
     } else {
-        console.log(
-            "\x1b[31m",
-            "Error: No path of PriceDB was specified ",
-            "\x1b[0m"
+        console.log( "\x1b[31m","Error: No path of PriceDB was specified ", "\x1b[0m"
         );
         return false;
     }
@@ -199,7 +202,6 @@ function Sort(transactions, options2) {
 //-------------------------PRINT ------------------------------
 function Print(transactions) {
     for (row in transactions) {
-        //Checa cuantos hay (row)
         var movements = transactions[row]["movements"].length;
         var date = transactions[row]["date"];
         date = date.replace(/\//g, "-");
@@ -265,14 +267,13 @@ function Register(transactions) {
     var total = [];
 
     for (row in transactions) {
-        //Checa cuantos hay (row)
         var movements = transactions[row]["movements"].length;
         var date = transactions[row]["date"];
         date = date.replace(/\//g, "-");
         var description = transactions[row]["description"];
 
         console.log(`${date} ${description}`);
-        //Redondeo de valores
+        
         function round(x) {
             return Number.parseFloat(x).toFixed(2);
         }
@@ -280,8 +281,10 @@ function Register(transactions) {
         for (var i = 0; i < movements; i++) {
             var amount = transactions[row]["movements"][i]["amount"];
             var curr = transactions[row]["movements"][i]["currency"];
-            var desc = transactions[row]["movements"][i]["description"];
-            //Checa si el objeto tiene la llave
+            var description = transactions[row]["movements"][i]["description"];
+            desc=description.padStart(50, " ");
+            
+            //Check if the object has the key
             if (sum.hasOwnProperty(curr)) {
                 sum[curr] += amount;
             } else {
@@ -292,20 +295,65 @@ function Register(transactions) {
             var state = [desc, amount, curr];
             Content.push(state);
 
-            new_desc = desc.padEnd(40, " ");
-            new_curr = curr.padStart(40, " ");
-            new_amount = round(amount);
-            new_sum = round(sum[curr]);
-            //Cadena Fancy
-            console.log(
-                `${new_desc} ${curr} ${new_amount} ${new_curr} ${new_sum}`
-            );
+            let new_desc = desc.padEnd(60, " ");
+            let new_curr = curr;
+            //.padStart(40, " ");
+            let new_amount = round(amount);
+            let new_sum = round(sum[curr]);
+
+            if (options2.market === true) {
+                
+                if (curr != New_commodity.trim()) {
+                 value = CountDT[curr].value.replace("$", "");
+                 let new_amountR = new_amount * value;
+                 let N_sum=new_sum* value;
+
+                 new_amountR=new_amountR.toFixed(2);
+                 N_sum=N_sum.toFixed(2);
+                 
+                //  New_commodity = New_commodity.padStart(10, " ") ;
+                        console.log( `${new_desc} ${New_commodity} ${new_amountR} ${New_commodity.padStart(20, " ")} ${N_sum}`);     
+                }else
+                { 
+                        console.log(`${new_desc} ${curr} ${new_amount} ${new_curr.padStart(20, " ")} ${new_sum}`);
+                }
+            }
+            else{
+                 new_curr=new_curr.padStart(20, " ");
+                 console.log( `${new_desc} ${curr} ${new_amount} ${new_curr} ${new_sum}`);
             // ${new_sum}
+            }
         }
+        let TotalA =0;
+        let TotalB =0;
+        let Total=0;
         for (quantity in sum) {
-            new_quantity = quantity.padStart(90, " ");
-            new_total = round(sum[quantity]);
-            console.log(new_quantity, new_total);
+            let new_quantity = quantity.trim(); 
+            let new_total = round(sum[quantity]);
+            //.padStart(90, " ")
+          
+            if (options2.market === true) {
+                if (quantity != New_commodity.trim()) {
+                    value = CountDT[quantity].value.replace("$", "");
+                    new_T=new_total*value;
+                    TotalA+=new_T;
+ 
+                    Total+=parseFloat(TotalA);
+                } 
+                else{
+                    TotalB+=parseFloat(new_total);
+                    Total+=parseFloat(TotalB);
+                } 
+            }
+            else
+            {
+            console.log(new_quantity.padStart(90, " "), new_total);
+            }
+            
+        }
+        if (options2.market === true) 
+        {
+            console.log(New_commodity.padStart(90, " "),Total.toFixed(2));
         }
     }
 }
@@ -320,14 +368,14 @@ function Balance(transactions, sort) {
 
     let Content = {};
     for (file in transactions) {
-        //Checar los movimientos
+        //Check the movements
         let movements = transactions[file]["movements"].length;
 
         for (let i = 0; i < movements; i++) {
             var amount = transactions[file]["movements"][i]["amount"];
             var curr = transactions[file]["movements"][i]["currency"];
             var description = transactions[file]["movements"][i]["description"];
-            //Checar descripcion
+            //Check description
             if (Content[description] != undefined) {
                 Content[description][0] += amount;
             } else {
@@ -346,6 +394,9 @@ function Balance(transactions, sort) {
             sum[currency] = Content[properties[des]][0];
         }
     }
+        let testsumA=0;
+        let testsumB=0;
+        let totalTEST=0;
 
     for (let i in properties) {
         let money = `${Content[properties[i]][1]} ${Content[properties[i]][0]}`;
@@ -355,6 +406,7 @@ function Balance(transactions, sort) {
         let money_balance = 1;
         let value = 1;
         let curr;
+
         if (options2.market === true) {
             qnt = money.match(/(.*)\s(-?\d+\.?\d*)/);
 
@@ -367,6 +419,11 @@ function Balance(transactions, sort) {
                     let new_amountB = money_balance * value;
                     new_amountB = new_amountB.toFixed(2);
                     New_commodity = New_commodity.padStart(10, " ") ;
+
+                    testsumA=parseFloat(new_amountB) ;
+                    totalTEST+=parseFloat(testsumA);
+
+
                     if (new_amountB > 0) {
                         console.log("\x1b[33m",`${New_commodity} ${new_amountB} ${properties[i]} `,"\x1b[0m");
                     } else {
@@ -374,7 +431,9 @@ function Balance(transactions, sort) {
                     }
                 }
                 else {
-                    
+                    testsumB=parseFloat(money_balance) ;
+                    totalTEST+=parseFloat(testsumB);
+
                     if (Content[properties[i]][0] > 0) {
                       
                         console.log( "\x1b[33m",`${curr.padStart(10," ")} ${money_balance} ${properties[i]}`, "\x1b[0m");
@@ -403,34 +462,13 @@ function Balance(transactions, sort) {
         if (sum.hasOwnProperty(i)) {
 
             let balance = i.padStart(12, " ");
-            
-
-            if (options2.market === true) {
-
-                new_bal=balance.trim();
-                if (new_bal!= New_commodity.trim()) 
-                {
-                    value = CountDT[new_bal].value.replace("$", "");
-                    sumA+=sum[i]*value;
-                   
-                }
-                else{
-                    sumB=sum[i];
-                    total = sumA + sumB
-                    console.log(New_commodity, total);
-                }
-                
-                
-                
-
+            if(options2.market === false){
+                console.log(balance.padStart(15," "), sum[i]);
             }
- 
-            else{
-                 console.log(balance, sum[i]);
-            }
-
-
-           
         }
+    }
+    if (options2.market === true) 
+    {
+        console.log(New_commodity, totalTEST);
     }
 }
