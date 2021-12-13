@@ -42,18 +42,21 @@ REQUIRED FLAG:
 ```
 
 PRINT
+<br />
 Prints the general ledger transactions in a textual format that can be parsed by the ledger.
 ```
  node index.js -f print  FILE 
 ```
 
 BALANCE
+<br />
 To find the balances of all of your accounts in your FILE
 ```
  node index.js -f balance  FILE 
 ```
 
 REGISTER
+<br />
 To show all transactions and a running total
 ```
  node index.js -f register  FILE 
@@ -69,6 +72,7 @@ node index.js -f -s d OPERATION FILE
 node index.js -f -s n OPERATION FILE
 ```
 -Price-Db
+<br />
 CURRENCY ( AG, AU, BTC, CAD ,AG)
 ```
 node index.js -f --price-db prices_db -mk -ex CURRENCY OPERATION FILE
